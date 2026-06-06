@@ -1,0 +1,16 @@
+# Load sops-encrypted dotenv file into direnv.
+use_sops_env() {
+  local file="$1"
+
+  if [[ ! -f "$file" ]]; then
+    echo "missing sops env file: $file" >&2
+    return 1
+  fi
+
+  if ! command -v sops >/dev/null 2>&1; then
+    echo "sops not found" >&2
+    return 1
+  fi
+
+  eval "$(sops -d "$file" | direnv dotenv bash /dev/stdin)"
+}

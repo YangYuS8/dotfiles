@@ -1,0 +1,34 @@
+# system/editor junk
+.DS_Store
+*.swp
+*.swo
+*.tmp
+*.log
+*.cache
+
+# shell state
+.zsh_history
+.bash_history
+.zcompdump*
+*.zwc
+
+# backups
+*.bak
+*.backup
+
+# plaintext secrets
+.env
+.env.*
+*.local
+*.secret
+*.token
+*.key
+private/
+.config/private/
+
+# age private key must never enter repo
+.config/sops/age/keys.txt
+sops/age/keys.txt
+
+# allow encrypted sops env files
+!secrets/*.sops.env
