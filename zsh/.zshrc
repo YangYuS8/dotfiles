@@ -61,6 +61,46 @@ else
 fi
 # lsd end
 
+# ssh-agent
+# Keep Git-over-SSH usable across common Linux distributions.
+# This only references the default key path and never reads or prints key content.
+_dotfiles_setup_ssh_agent() {
+  command -v ssh-agent >/dev/null 2>&1 || return 0
+  command -v ssh-add >/dev/null 2>&1 || return 0
+
+  local ssh_env="$HOME/.ssh/agent-env"
+  local default_key="$HOME/.ssh/id_ed25519"
+  local ssh_add_status=2
+
+  ssh-add -l >/dev/null 2>&1
+  ssh_add_status=$?
+
+  if [[ -n "${SSH_AUTH_SOCK:-}" && "$ssh_add_status" -lt 2 ]]; then
+    :
+  elif [[ -r "$ssh_env" ]]; then
+    source "$ssh_env" >/dev/null 2>&1
+    if [[ -z "${SSH_AGENT_PID:-}" ]] || ! kill -0 "$SSH_AGENT_PID" >/dev/null 2>&1; then
+      ssh-agent -s >| "$ssh_env"
+      chmod 600 "$ssh_env"
+      source "$ssh_env" >/dev/null 2>&1
+    fi
+  else
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+    ssh-agent -s >| "$ssh_env"
+    chmod 600 "$ssh_env"
+    source "$ssh_env" >/dev/null 2>&1
+  fi
+
+  if [[ -f "$default_key" ]]; then
+    ssh-add -l 2>/dev/null | grep -F "$default_key" >/dev/null 2>&1 || ssh-add "$default_key" >/dev/null 2>&1
+  fi
+}
+
+_dotfiles_setup_ssh_agent
+unset -f _dotfiles_setup_ssh_agent
+
+
 # Load dotenv secrets encrypted by sops.
 load_sops_env() {
   local file="$1"
