@@ -4,7 +4,7 @@ Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
 Chinese guide: [README.zh-Hans.md](./README.zh-Hans.md)
 
-This repository is meant to restore my core development and desktop configuration on CachyOS / Arch-like Linux systems. It should contain reproducible configuration, not caches, login sessions, or plaintext secrets.
+This repository is meant to restore my core development and desktop configuration on common Linux distributions, including Arch Linux, Debian/Ubuntu, and Fedora. It should contain reproducible configuration, not caches, login sessions, or plaintext secrets.
 
 ## Core idea
 
@@ -35,16 +35,43 @@ After running Stow:
 
 ## Install required tools
 
-On CachyOS / Arch Linux:
+Arch Linux:
 
 ```bash
 sudo pacman -S stow git
 ```
 
+Debian / Ubuntu:
+
+```bash
+sudo apt update
+sudo apt install stow git
+```
+
+Fedora:
+
+```bash
+sudo dnf install stow git
+```
+
 Optional tools for encrypted secrets and per-project environment variables:
+
+Arch Linux:
 
 ```bash
 sudo pacman -S sops age direnv
+```
+
+Debian / Ubuntu:
+
+```bash
+sudo apt install sops age direnv
+```
+
+Fedora:
+
+```bash
+sudo dnf install sops age direnv
 ```
 
 ## Apply packages
@@ -281,7 +308,15 @@ Avoid managing caches, login state, browser profiles, package stores, and whole 
 ## New machine bootstrap
 
 ```bash
+# Arch Linux:
 sudo pacman -S git stow sops age direnv
+
+# Debian / Ubuntu:
+sudo apt update
+sudo apt install git stow sops age direnv
+
+# Fedora:
+sudo dnf install git stow sops age direnv
 
 git clone https://github.com/YangYuS8/dotfiles.git ~/dotfiles
 cd ~/dotfiles

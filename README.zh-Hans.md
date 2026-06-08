@@ -1,6 +1,6 @@
 # dotfiles 使用手册
 
-这个仓库用来管理我的个人 dotfiles，主要面向 CachyOS / Arch 系 Linux。核心工具是 **GNU Stow**。
+这个仓库用来管理我的个人 dotfiles，目标是尽量适配常见 Linux 发行版，包括 Arch Linux、Debian/Ubuntu 和 Fedora。核心工具是 **GNU Stow**。
 
 > 这个仓库只应该保存“可复现的配置”，不要保存缓存、登录状态、浏览器数据、真实 token、私钥或其它敏感信息。
 
@@ -35,16 +35,43 @@ dotfiles/
 
 ## 安装工具
 
-CachyOS / Arch Linux：
+Arch Linux：
 
 ```bash
 sudo pacman -S stow git
 ```
 
+Debian / Ubuntu：
+
+```bash
+sudo apt update
+sudo apt install stow git
+```
+
+Fedora：
+
+```bash
+sudo dnf install stow git
+```
+
 如果要使用加密敏感信息和项目级环境变量，再装：
+
+Arch Linux：
 
 ```bash
 sudo pacman -S sops age direnv
+```
+
+Debian / Ubuntu：
+
+```bash
+sudo apt install sops age direnv
+```
+
+Fedora：
+
+```bash
+sudo dnf install sops age direnv
 ```
 
 ## 应用配置
@@ -483,7 +510,9 @@ stow -v -t ~ direnv
 在 `~/dotfiles/zsh/.zshrc` 末尾加入：
 
 ```bash
-eval "$(direnv hook zsh)"
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook zsh)"
+fi
 ```
 
 重新加载：
@@ -587,7 +616,15 @@ sops/age/keys.txt
 ## 新机器恢复流程
 
 ```bash
+# Arch Linux：
 sudo pacman -S git stow sops age direnv
+
+# Debian / Ubuntu：
+sudo apt update
+sudo apt install git stow sops age direnv
+
+# Fedora：
+sudo dnf install git stow sops age direnv
 
 git clone https://github.com/YangYuS8/dotfiles.git ~/dotfiles
 cd ~/dotfiles

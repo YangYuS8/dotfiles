@@ -15,7 +15,10 @@ export PNPM_HOME="$HOME/.local/share/pnpm"
 export PATH="$HOME/.bun/bin:$PATH"
 export PUB_HOSTED_URL="https://pub.flutter-io.cn"
 export FLUTTER_STORAGE_BASE_URL="https://storage.flutter-io.cn"
-export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
+
+if [[ -n "${XDG_RUNTIME_DIR:-}" && -S "$XDG_RUNTIME_DIR/podman/podman.sock" ]]; then
+    export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
+fi
 
 # 路径去重与合并
 typeset -U path
