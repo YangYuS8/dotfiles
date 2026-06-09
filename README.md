@@ -80,15 +80,15 @@ Always preview first:
 
 ```bash
 cd ~/dotfiles
-stow -nv -t ~ zsh
-stow -v -t ~ zsh
+./stow.sh zsh
+./stow.sh --apply zsh
 ```
 
 Apply multiple packages explicitly:
 
 ```bash
 cd ~/dotfiles
-stow -v -t ~ zsh git micro
+./stow.sh --apply zsh git micro
 ```
 
 Do not blindly run `stow -t ~ *`, because directories such as `secrets/` are not meant to be Stow packages.
@@ -108,6 +108,22 @@ Restow one package:
 cd ~/dotfiles
 stow -R -t ~ zsh
 ```
+
+## GitHub to CNB sync
+
+`.github/workflows/sync-to-cnb.yml` mirrors GitHub pushes to CNB:
+
+```text
+https://cnb.cool/Nesoriel/YangYuS8/dotfiles
+```
+
+Configure this GitHub Actions repository secret:
+
+```text
+CNB_TOKEN
+```
+
+CNB Git HTTPS authentication uses the fixed username `cnb` and an access token as the password. The token needs write access to the target CNB repository.
 
 ## Add an existing config file
 
@@ -178,7 +194,13 @@ stow -nv -t ~ package
 stow -v -t ~ package
 ```
 
-Avoid `stow --adopt` unless I fully understand what it will move into this repository.
+The helper script also supports adoption for selected packages:
+
+```bash
+./stow.sh --adopt package
+```
+
+Avoid adoption unless I fully understand what it will move into this repository. Preview the package first with `./stow.sh package`.
 
 ## Secrets policy
 
@@ -203,7 +225,7 @@ Allowed:
 
 ```text
 secrets/*.sops.env    # encrypted by sops
-.npmrc                # only if it references ${NPM_TOKEN}, not a real token
+.npmrc                # registry and other public config only, no auth token
 .gitconfig signingkey # okay if it is a GPG key ID or public SSH key path
 ```
 
@@ -252,10 +274,11 @@ NPM_TOKEN=real_token_here
 
 After saving, the file should contain encrypted `ENC[...]` values.
 
-Example `.npmrc` managed by Stow:
+Use the shell helpers for commands that need an npm token:
 
-```ini
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```bash
+npm-auth publish
+pnpm-auth publish
 ```
 
 Example `.envrc` in a project:
@@ -278,6 +301,10 @@ Current core packages:
 zsh
 git
 micro
+desktop
+fcitx5
+npm
+pnpm
 ```
 
 Good future packages:
@@ -300,7 +327,6 @@ qt
 systemd
 environment
 direnv
-npm
 ```
 
 Avoid managing caches, login state, browser profiles, package stores, and whole IDE data directories.
@@ -321,8 +347,8 @@ sudo dnf install git stow sops age direnv
 git clone https://github.com/YangYuS8/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
-stow -nv -t ~ zsh git micro
-stow -v -t ~ zsh git micro
+./stow.sh zsh git micro
+./stow.sh --apply zsh git micro
 ```
 
 If encrypted secrets are needed, restore or create:

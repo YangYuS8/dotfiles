@@ -76,24 +76,24 @@ sudo dnf install sops age direnv
 
 ## 应用配置
 
-永远先预演：
+永远先预演，可以直接用仓库脚本：
 
 ```bash
 cd ~/dotfiles
-stow -nv -t ~ zsh
+./stow.sh zsh
 ```
 
 确认没有 conflict 后再真正执行：
 
 ```bash
-stow -v -t ~ zsh
+./stow.sh --apply zsh
 ```
 
 一次应用多个包：
 
 ```bash
 cd ~/dotfiles
-stow -v -t ~ zsh git micro
+./stow.sh --apply zsh git micro
 ```
 
 不要偷懒执行：
@@ -119,6 +119,22 @@ stow -D -t ~ zsh
 cd ~/dotfiles
 stow -R -t ~ zsh
 ```
+
+## GitHub 自动同步到 CNB
+
+`.github/workflows/sync-to-cnb.yml` 会在 GitHub push 后把分支和 tag 同步到 CNB：
+
+```text
+https://cnb.cool/Nesoriel/YangYuS8/dotfiles
+```
+
+需要在 GitHub 仓库的 Actions secrets 里配置：
+
+```text
+CNB_TOKEN
+```
+
+CNB 的 Git HTTPS 认证用户名固定为 `cnb`，密码使用访问令牌；这个 token 需要对目标 CNB 仓库有写权限。
 
 ## 添加已有配置文件
 
@@ -204,13 +220,13 @@ stow -v -t ~ package
 
 ### 慎用 `--adopt`
 
-不要随便用：
+仓库脚本支持指定包 adopt：
 
 ```bash
-stow --adopt
+./stow.sh --adopt package
 ```
 
-它会把已有目标移动进仓库。除非我非常确定它会移动什么，否则不要用。
+它会把已有目标移动进仓库。除非我非常确定它会移动什么，否则不要用。新纳入已有本机配置时，先执行 `./stow.sh package` 看清楚冲突列表，再决定是否 adopt。
 
 ## 哪些适合放进 dotfiles
 
@@ -299,7 +315,7 @@ Kubernetes kubeconfig
 
 ```text
 secrets/*.sops.env    # 已经被 sops 加密的文件
-.npmrc                # 只引用 ${NPM_TOKEN}，不包含真实 token
+.npmrc                # 只放 registry 等公开配置，不写 auth token
 .gitconfig signingkey # 如果只是 GPG key ID 或 SSH 公钥路径，一般没问题
 ```
 
@@ -449,25 +465,24 @@ sops_mac=...
 sops -d secrets/npm.sops.env
 ```
 
-## `.npmrc` 的正确写法
+## npm token 的正确用法
 
 不要把真实 token 写进 `.npmrc`。
 
-`~/dotfiles/npm/.npmrc` 应该写：
+`~/dotfiles/npm/.npmrc` 只保留公开配置，例如：
 
 ```ini
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+registry=https://registry.npmjs.org/
 ```
 
-然后：
+需要 token 的命令用 shell helper 临时注入：
 
 ```bash
-cd ~/dotfiles
-stow -nv -t ~ npm
-stow -v -t ~ npm
+npm-auth publish
+pnpm-auth publish
 ```
 
-真实 `NPM_TOKEN` 由 sops + direnv 提供。
+helper 会优先读取当前环境里的 npm token；如果没有，会尝试解密 `~/dotfiles/secrets/npm.sops.env`，并把 token 写到运行时临时 npmrc，不会写进仓库。
 
 ## 配置 direnv
 
@@ -629,8 +644,8 @@ sudo dnf install git stow sops age direnv
 git clone https://github.com/YangYuS8/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
-stow -nv -t ~ zsh git micro
-stow -v -t ~ zsh git micro
+./stow.sh zsh git micro
+./stow.sh --apply zsh git micro
 ```
 
 如果要解密 secrets，需要恢复：
