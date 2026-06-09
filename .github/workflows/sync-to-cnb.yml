@@ -1,0 +1,52 @@
+name: Sync to CNB
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-to-cnb-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Push refs to CNB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Push branches and tags
+        env:
+          CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+          CNB_REPOSITORY: https://cnb.cool/Nesoriel/YangYuS8/dotfiles
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          : "${CNB_TOKEN:?Set the GitHub repository secret CNB_TOKEN to a CNB access token with write permission.}"
+
+          git remote add cnb "$CNB_REPOSITORY" 2>/dev/null || git remote set-url cnb "$CNB_REPOSITORY"
+          git update-ref -d refs/remotes/origin/HEAD 2>/dev/null || true
+
+          auth_header="Authorization: Basic $(printf 'cnb:%s' "$CNB_TOKEN" | base64 | tr -d '\n')"
+
+          git -c "http.https://cnb.cool/.extraheader=$auth_header" \
+            push --force --prune cnb "refs/remotes/origin/*:refs/heads/*"
+
+          if git show-ref --tags --quiet; then
+            git -c "http.https://cnb.cool/.extraheader=$auth_header" \
+              push --force --prune cnb "refs/tags/*:refs/tags/*"
+          else
+            echo "No tags to sync."
+          fi
