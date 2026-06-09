@@ -1,19 +1,19 @@
 [credential "https://github.com"]
-        helper =
-        helper = !/usr/bin/gh auth git-credential
+    helper =
+    helper = !/usr/bin/gh auth git-credential
 
 [credential "https://gist.github.com"]
-        helper =
-        helper = !/usr/bin/gh auth git-credential
+    helper =
+    helper = !/usr/bin/gh auth git-credential
 
 [credential "https://cnb.cool"]
-        helper =
-        helper = !cnb git-credential
-        useHttpPath = true
+    helper =
+    helper = !cnb git-credential
+    useHttpPath = true
 
 [user]
-        name = YangYuS8
-        email = yangyus8@163.com
+    name = YangYuS8
+	email = YangYuS8@163.com
 	signingkey = 5766204AC9DBFCBC
 [commit]
 	gpgsign = true
