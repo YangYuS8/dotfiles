@@ -1,10 +1,15 @@
-# 1. P10k 瞬时提示 (必须放在最顶部)
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+# CachyOS loads its own instant prompt block. On other systems, keep p10k close
+# to the top of .zshrc.
+if [[ ! -r /usr/share/cachyos-zsh-config/cachyos-config.zsh && -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# 2. Oh-My-Zsh / 补全系统初始化
-export ZSH_COMPDUMP="${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump}"
+[[ $- != *i* ]] && return
+
+[[ -r "$HOME/.config/zsh/env.zsh" ]] && source "$HOME/.config/zsh/env.zsh"
+
+# Completion and shell framework setup.
+export ZSH_COMPDUMP="${ZSH_COMPDUMP:-${ZDOTDIR:-$HOME}/.zcompdump-${ZSH_VERSION}}"
 export ZSH_DISABLE_COMPFIX=true
 zstyle ':omz:update' frequency 7
 
@@ -12,22 +17,15 @@ if [[ -d "$HOME/.oh-my-zsh/custom/completions" ]]; then
   fpath=("$HOME/.oh-my-zsh/custom/completions" $fpath)
 fi
 
-autoload -Uz compinit
-compinit
-
-# 3. 加载发行版/本机可选配置与 P10k 主题
 if [[ -r /usr/share/cachyos-zsh-config/cachyos-config.zsh ]]; then
   source /usr/share/cachyos-zsh-config/cachyos-config.zsh
+else
+  autoload -Uz compinit
+  compinit -d "$ZSH_COMPDUMP"
+
+  [[ -r /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ]] && source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+  [[ -r "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 fi
-
-[[ ! -r "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
-
-# 4. Node & Package Manager
-export PNPM_HOME="$HOME/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
 
 if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd)"
@@ -37,17 +35,14 @@ if [[ -n "${PNPM_HOME:-}" && -r "$PNPM_HOME/completion.zsh" ]]; then
   source "$PNPM_HOME/completion.zsh"
 fi
 
-# 5. 自动建议颜色与交互优化
+# Interactive behavior.
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan,bold'
 unsetopt correct_all
 
-# 6. 编译补全文件以加速加载
-zcompdump="${ZDOTDIR:-$HOME}/.zcompdump-${ZSH_VERSION}"
-if [[ -s "$zcompdump" && (! -s "${zcompdump}.zwc" || "$zcompdump" -nt "${zcompdump}.zwc") ]]; then
-    zcompile "$zcompdump"
+if [[ -s "$ZSH_COMPDUMP" && (! -s "${ZSH_COMPDUMP}.zwc" || "$ZSH_COMPDUMP" -nt "${ZSH_COMPDUMP}.zwc") ]]; then
+  zcompile "$ZSH_COMPDUMP"
 fi
 
-# lsd
 if command -v lsd >/dev/null 2>&1; then
   alias ls='lsd'
   alias l='lsd -l'
@@ -59,9 +54,7 @@ else
   alias la='ls -a'
   alias lla='ls -la'
 fi
-# lsd end
 
-# ssh-agent
 # Keep Git-over-SSH usable across common Linux distributions.
 # This only references the default key path and never reads or prints key content.
 _dotfiles_setup_ssh_agent() {
@@ -100,7 +93,6 @@ _dotfiles_setup_ssh_agent() {
 _dotfiles_setup_ssh_agent
 unset -f _dotfiles_setup_ssh_agent
 
-
 # Load dotenv secrets encrypted by sops.
 load_sops_env() {
   local file="$1"
@@ -115,17 +107,58 @@ load_sops_env() {
   fi
 
   set -a
-  source <(sops -d "$file")
+  source <(sops -d --input-type dotenv --output-type dotenv "$file")
   set +a
 }
 
-# 默认不在 shell 启动时解密 secrets。需要时显式启用：
+# Secrets are not decrypted on shell startup. Enable this explicitly if needed:
 # export DOTFILES_LOAD_GLOBAL_SOPS_ENV=1
 if [[ "${DOTFILES_LOAD_GLOBAL_SOPS_ENV:-0}" == "1" ]]; then
   load_sops_env "$HOME/dotfiles/secrets/global.sops.env"
 fi
 
-# direnv
+_dotfiles_npm_userconfig() {
+  local token="${NPM_TOKEN:-${NODE_AUTH_TOKEN:-}}"
+  local secrets_file="${DOTFILES_NPM_SOPS_ENV:-$HOME/dotfiles/secrets/npm.sops.env}"
+
+  if [[ -z "$token" && -f "$secrets_file" ]]; then
+    load_sops_env "$secrets_file" || return 1
+    token="${NPM_TOKEN:-${NODE_AUTH_TOKEN:-}}"
+  fi
+
+  if [[ -z "$token" ]]; then
+    echo "NPM_TOKEN is not set, and no token was loaded from $secrets_file" >&2
+    return 1
+  fi
+
+  local dir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfiles-npm"
+  mkdir -p "$dir"
+  chmod 700 "$dir" 2>/dev/null || true
+
+  local config="$dir/npmrc"
+  (
+    umask 077
+    {
+      print -r -- "registry=https://registry.npmjs.org/"
+      print -r -- "//registry.npmjs.org/:_authToken=$token"
+    } >| "$config"
+  )
+
+  print -r -- "$config"
+}
+
+npm-auth() {
+  local config
+  config="$(_dotfiles_npm_userconfig)" || return $?
+  NPM_CONFIG_USERCONFIG="$config" npm "$@"
+}
+
+pnpm-auth() {
+  local config
+  config="$(_dotfiles_npm_userconfig)" || return $?
+  NPM_CONFIG_USERCONFIG="$config" pnpm "$@"
+}
+
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
 fi
