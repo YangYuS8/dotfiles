@@ -1,6 +1,4 @@
 # Shared zsh environment for login and interactive shells.
-[[ -n "${DOTFILES_ZSH_ENV_LOADED:-}" ]] && return 0
-export DOTFILES_ZSH_ENV_LOADED=1
 
 export BROWSER="${BROWSER:-firefox}"
 export TERMINAL="${TERMINAL:-alacritty}"
@@ -30,6 +28,7 @@ path=(
   "$HOME/.local/bin"
   "$HOME/.bun/bin"
   "$PNPM_HOME"
+  "$PNPM_HOME/bin"
   "$HOME/go/bin"
   $path
 )

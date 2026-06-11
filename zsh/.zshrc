@@ -159,6 +159,10 @@ pnpm-auth() {
   NPM_CONFIG_USERCONFIG="$config" pnpm "$@"
 }
 
-if command -v direnv >/dev/null 2>&1; then
+if [[ "${DOTFILES_ENABLE_DIRENV:-1}" == "1" ]] && command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
 fi
+
+# >>> Codex installer >>>
+export PATH="/home/yangyus8/.local/bin:$PATH"
+# <<< Codex installer <<<
