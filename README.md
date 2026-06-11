@@ -21,6 +21,8 @@ dotfiles/
 │   └── .p10k.zsh
 ├── git/
 │   └── .gitconfig
+├── niri/
+│   └── .config/niri/
 └── micro/
     └── .config/micro/
 ```

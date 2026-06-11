@@ -1,0 +1,288 @@
+// Niri + Noctalia 配置
+// 参考: https://github.com/YaLTeR/niri/wiki
+
+// ────────────── 输入设备 ──────────────
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+        numlock
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+
+    focus-follows-mouse
+    workspace-auto-back-and-forth
+}
+
+// ────────────── 输出设备 ──────────────
+// 运行 `niri msg outputs` 获取显示器名称。
+// 当前 DP-1 配置保留为禁用模板；需要时删除 `/-` 启用。
+/- output "DP-1" {
+    mode "2560x1440@359.979"
+    scale 1
+}
+
+// ────────────── 快捷键 ──────────────
+binds {
+    MOD+SHIFT+SLASH hotkey-overlay-title="显示快捷键手册" { show-hotkey-overlay; }
+
+    // 应用程序
+    MOD+RETURN  hotkey-overlay-title="打开终端: Alacritty" { spawn-sh "alacritty"; }
+    MOD+B       hotkey-overlay-title="打开浏览器: Firefox" { spawn-sh "firefox"; }
+    MOD+E       hotkey-overlay-title="打开文件管理器: Nautilus" { spawn-sh "nautilus"; }
+
+    // Noctalia Shell
+    MOD+Space   hotkey-overlay-title="应用启动器" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+    MOD+S       hotkey-overlay-title="控制中心" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "controlCenter" "toggle"; }
+    MOD+Comma   hotkey-overlay-title="设置" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "settings" "toggle"; }
+    MOD+V       hotkey-overlay-title="剪贴板历史" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "clipboard"; }
+    MOD+X       hotkey-overlay-title="会话菜单" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "sessionMenu" "toggle"; }
+    MOD+SHIFT+L hotkey-overlay-title="锁定屏幕" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
+
+    // 音频与媒体控制
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "volume" "increase"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "volume" "decrease"; }
+    XF86AudioMute        allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "volume" "muteOutput"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "volume" "muteInput"; }
+
+    XF86AudioPlay  allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "playPause"; }
+    XF86AudioPause allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "pause"; }
+    XF86AudioNext  allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "next"; }
+    XF86AudioPrev  allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "media" "previous"; }
+
+    // 窗口焦点与移动
+    MOD+Q hotkey-overlay-title="关闭窗口" { close-window; }
+
+    MOD+LEFT  hotkey-overlay-title="焦点移至左侧列" { focus-column-left; }
+    MOD+RIGHT hotkey-overlay-title="焦点移至右侧列" { focus-column-right; }
+    MOD+UP    { focus-window-up; }
+    MOD+DOWN  { focus-window-down; }
+
+    MOD+CTRL+LEFT  hotkey-overlay-title="移动列至左侧" { move-column-left; }
+    MOD+CTRL+RIGHT hotkey-overlay-title="移动列至右侧" { move-column-right; }
+    MOD+CTRL+UP    { move-window-up; }
+    MOD+CTRL+DOWN  { move-window-down; }
+
+    MOD+HOME      hotkey-overlay-title="焦点移至第一列" { focus-column-first; }
+    MOD+END       hotkey-overlay-title="焦点移至最后一列" { focus-column-last; }
+    MOD+CTRL+HOME hotkey-overlay-title="移动列至最前" { move-column-to-first; }
+    MOD+CTRL+END  hotkey-overlay-title="移动列至最后" { move-column-to-last; }
+
+    MOD+ALT+LEFT  { focus-monitor-left; }
+    MOD+ALT+RIGHT { focus-monitor-right; }
+    MOD+ALT+UP    hotkey-overlay-title="焦点移至上方显示器" { focus-monitor-up; }
+    MOD+ALT+DOWN  hotkey-overlay-title="焦点移至下方显示器" { focus-monitor-down; }
+
+    MOD+ALT+CTRL+LEFT  { move-column-to-monitor-left; }
+    MOD+ALT+CTRL+RIGHT { move-column-to-monitor-right; }
+    MOD+ALT+CTRL+UP    hotkey-overlay-title="移动列至上方显示器" { move-column-to-monitor-up; }
+    MOD+ALT+CTRL+DOWN  hotkey-overlay-title="移动列至下方显示器" { move-column-to-monitor-down; }
+
+    // 鼠标滚轮导航
+    MOD+WHEELSCROLLDOWN      cooldown-ms=150 hotkey-overlay-title="切换至下方工作区" { focus-workspace-down; }
+    MOD+WHEELSCROLLUP        cooldown-ms=150 hotkey-overlay-title="切换至上方工作区" { focus-workspace-up; }
+    MOD+CTRL+WHEELSCROLLDOWN cooldown-ms=150 hotkey-overlay-title="移动列至下方工作区" { move-column-to-workspace-down; }
+    MOD+CTRL+WHEELSCROLLUP   cooldown-ms=150 hotkey-overlay-title="移动列至上方工作区" { move-column-to-workspace-up; }
+
+    MOD+WHEELSCROLLRIGHT       hotkey-overlay-title="焦点移至右侧列" { focus-column-right; }
+    MOD+WHEELSCROLLLEFT        hotkey-overlay-title="焦点移至左侧列" { focus-column-left; }
+    MOD+CTRL+WHEELSCROLLRIGHT  hotkey-overlay-title="移动列至右侧" { move-column-right; }
+    MOD+CTRL+WHEELSCROLLLEFT   hotkey-overlay-title="移动列至左侧" { move-column-left; }
+
+    MOD+SHIFT+WHEELSCROLLDOWN      hotkey-overlay-title="焦点移至右侧列" { focus-column-right; }
+    MOD+SHIFT+WHEELSCROLLUP        hotkey-overlay-title="焦点移至左侧列" { focus-column-left; }
+    MOD+CTRL+SHIFT+WHEELSCROLLDOWN hotkey-overlay-title="移动列至右侧" { move-column-right; }
+    MOD+CTRL+SHIFT+WHEELSCROLLUP   hotkey-overlay-title="移动列至左侧" { move-column-left; }
+
+    // 工作区
+    MOD+1 hotkey-overlay-title="切换至工作区 1" { focus-workspace 1; }
+    MOD+2 { focus-workspace 2; }
+    MOD+3 { focus-workspace 3; }
+    MOD+4 { focus-workspace 4; }
+    MOD+5 { focus-workspace 5; }
+    MOD+6 { focus-workspace 6; }
+    MOD+7 { focus-workspace 7; }
+    MOD+8 { focus-workspace 8; }
+    MOD+9 { focus-workspace 9; }
+
+    MOD+CTRL+1 hotkey-overlay-title="移动至工作区 1" { move-column-to-workspace 1; }
+    MOD+CTRL+2 { move-column-to-workspace 2; }
+    MOD+CTRL+3 { move-column-to-workspace 3; }
+    MOD+CTRL+4 { move-column-to-workspace 4; }
+    MOD+CTRL+5 { move-column-to-workspace 5; }
+    MOD+CTRL+6 { move-column-to-workspace 6; }
+    MOD+CTRL+7 { move-column-to-workspace 7; }
+    MOD+CTRL+8 { move-column-to-workspace 8; }
+    MOD+CTRL+9 { move-column-to-workspace 9; }
+
+    MOD+TAB hotkey-overlay-title="切换至上一个工作区" { focus-workspace-previous; }
+
+    // 布局
+    MOD+CTRL+F            hotkey-overlay-title="列扩展至最大可用宽度" { expand-column-to-available-width; }
+    MOD+C                 hotkey-overlay-title="居中当前列" { center-column; }
+    MOD+CTRL+C            hotkey-overlay-title="居中所有可见列" { center-visible-columns; }
+    MOD+BRACKETLEFT       hotkey-overlay-title="减小列宽度 (-10%)" { set-column-width "-10%"; }
+    MOD+BRACKETRIGHT      hotkey-overlay-title="增加列宽度 (+10%)" { set-column-width "+10%"; }
+    MOD+SHIFT+BRACKETLEFT hotkey-overlay-title="减小窗口高度 (-10%)" { set-window-height "-10%"; }
+    MOD+SHIFT+BRACKETRIGHT hotkey-overlay-title="增加窗口高度 (+10%)" { set-window-height "+10%"; }
+
+    MOD+T hotkey-overlay-title="切换浮动窗口模式" { toggle-window-floating; }
+    MOD+F hotkey-overlay-title="切换全屏模式" { fullscreen-window; }
+    MOD+W hotkey-overlay-title="切换标签显示模式" { toggle-column-tabbed-display; }
+
+    // 截图与录屏
+    PRINT       hotkey-overlay-title="截图（选择区域）" { screenshot; }
+    MOD+PRINT   hotkey-overlay-title="截图（当前屏幕）" { screenshot-screen; }
+    MOD+SHIFT+S hotkey-overlay-title="截图（当前窗口）" { screenshot-window; }
+    MOD+R       hotkey-overlay-title="开始/停止屏幕录制" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "screenRecorder" "toggle"; }
+
+    // 系统控制
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "brightness" "increase"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "brightness" "decrease"; }
+
+    MOD+N       hotkey-overlay-title="通知历史" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "notifications" "toggleHistory"; }
+    MOD+SHIFT+N hotkey-overlay-title="切换勿扰模式" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "notifications" "toggleDND"; }
+    MOD+CTRL+N  hotkey-overlay-title="清除所有通知" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "notifications" "dismissAll"; }
+
+    MOD+I       hotkey-overlay-title="切换空闲抑制器" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "idleInhibitor" "toggle"; }
+    MOD+SHIFT+T hotkey-overlay-title="切换深色/浅色主题" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "darkMode" "toggle"; }
+    MOD+SHIFT+W hotkey-overlay-title="壁纸选择器" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "wallpaper" "toggle"; }
+    MOD+SHIFT+B hotkey-overlay-title="切换顶栏可见性" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "bar" "toggle"; }
+
+    // 紧急控制与退出
+    MOD+ESCAPE      allow-inhibiting=false hotkey-overlay-title="恢复快捷键控制权" { toggle-keyboard-shortcuts-inhibit; }
+    CTRL+ALT+DELETE hotkey-overlay-title="退出 Niri" { quit; }
+    MOD+SHIFT+P     hotkey-overlay-title="关闭显示器" { power-off-monitors; }
+    MOD+O           repeat=false hotkey-overlay-title="切换概览模式" { toggle-overview; }
+}
+
+// ────────────── 启动项 ──────────────
+spawn-sh-at-startup "/usr/lib/polkit-kde-authentication-agent-1 &"
+spawn-sh-at-startup "swww-daemon"
+spawn-sh-at-startup "swww img /usr/share/wallpapers/cachyos-wallpapers/Skyscraper.png"
+spawn-at-startup "qs" "-c" "noctalia-shell"
+
+prefer-no-csd
+screenshot-path null
+
+// ────────────── 布局 ──────────────
+layout {
+    gaps 16
+    center-focused-column "never"
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    focus-ring {
+        width 3
+        active-color "#00ac89"
+        inactive-color "#505050"
+    }
+
+    shadow {
+        softness 30
+        spread 5
+        offset x=0 y=5
+        color "#0007"
+    }
+
+    struts {}
+}
+
+// ────────────── 动画 ──────────────
+animations {
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 200
+        curve "ease-out-quad"
+    }
+    window-close {
+        duration-ms 200
+        curve "ease-out-cubic"
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    }
+    config-notification-open-close {
+        spring damping-ratio=0.6 stiffness=1200 epsilon=0.001
+    }
+    screenshot-ui-open {
+        duration-ms 300
+        curve "ease-out-quad"
+    }
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+}
+
+// ────────────── 窗口规则 ──────────────
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+window-rule {
+    geometry-corner-radius 20
+    clip-to-geometry true
+}
+
+// ────────────── Noctalia 概览与壁纸 ──────────────
+// 当前方案：由 Noctalia 提供模糊概览壁纸。
+layer-rule {
+    match namespace="^noctalia-overview*"
+    place-within-backdrop true
+}
+
+// 备用方案：固定壁纸。需要时删除 `/-` 并在 Noctalia 设置中关闭概览壁纸。
+/- layer-rule {
+    match namespace="^noctalia-wallpaper*"
+    place-within-backdrop true
+}
+/- layout {
+    background-color "transparent"
+}
+
+// 备用方案：纯色概览。需要时删除 `/-` 并在 Noctalia 设置中关闭概览壁纸。
+/- overview {
+    backdrop-color "#26233a"
+}
+
+// ────────────── 环境变量 ──────────────
+environment {
+    DISPLAY ":1"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    QT_QPA_PLATFORM "wayland"
+    QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
+    QT_STYLE_OVERRIDE "kvantum"
+    QT_QPA_PLATFORMTHEME "qt6ct"
+    XDG_SESSION_TYPE "wayland"
+    XDG_CURRENT_DESKTOP "niri"
+}
+
+// ────────────── 其他 ──────────────
+hotkey-overlay {
+    skip-at-startup
+}
+
+debug {
+    // 允许来自 Noctalia 的通知操作和窗口激活。
+    honor-xdg-activation-with-invalid-serial
+}
+
+include "./noctalia.kdl"

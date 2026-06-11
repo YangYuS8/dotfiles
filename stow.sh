@@ -17,6 +17,7 @@ default_packages=(
   git
   micro
   neovide
+  niri
   npm
   nvim
   pnpm
