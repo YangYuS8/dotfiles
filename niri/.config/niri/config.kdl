@@ -163,8 +163,6 @@ binds {
 
 // ────────────── 启动项 ──────────────
 spawn-sh-at-startup "/usr/lib/polkit-kde-authentication-agent-1 &"
-spawn-sh-at-startup "swww-daemon"
-spawn-sh-at-startup "swww img /usr/share/wallpapers/cachyos-wallpapers/Skyscraper.png"
 spawn-at-startup "qs" "-c" "noctalia-shell"
 
 prefer-no-csd
