@@ -4,6 +4,9 @@
 
 local map = vim.keymap.set
 
+map("n", "<C-z>", "u", { desc = "Undo" })
+map("i", "<C-z>", "<C-o>u", { desc = "Undo" })
+
 map({ "n", "i", "x", "s" }, "<C-s>", function()
   vim.cmd.write()
 end, { desc = "Save File" })
